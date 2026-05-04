@@ -2,8 +2,14 @@
 
 # BERT Multi-Class Text Classification Pipeline
 
-Fine-tune `bert-base-cased` for multi-class text classification with a clean, modular pipeline.
+Fine-tuning `bert-base-cased` for multi-class text classification with a clean, modular  pipeline — covering data loading, training, evaluation, inference, and visualization in a single `.run()` call.
 
+---
+## Problem Statement
+
+Text classification at scale requires a reliable, reproducible pipeline that handles the full ML lifecycle: from raw CSV to a saved, deployable model. This project provides an end-to-end solution for fine-tuning BERT on any multi-class text dataset, demonstrated on the [BBC News dataset](https://www.kaggle.com/datasets/hgultekin/bbcnewsarchive) (5 categories: *business, entertainment, politics, sport, tech*).
+
+---
 ## Architecture
 
 | Class | Role |
