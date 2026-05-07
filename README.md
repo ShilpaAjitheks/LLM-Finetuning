@@ -121,3 +121,19 @@ viz.plot_confusion_matrix()
 
 ---
 
+## Output Artifacts
+
+After a successful run, the following are saved to `bert_multiclass_model/` (configurable via `Config.save_dir`):
+
+```
+bert_multiclass_model/
+├── config.json
+├── model.safetensors
+├── tokenizer_config.json
+├── vocab.txt
+├── label_encoder.pkl
+└── classification_report.txt
+
+bert_multiclass_model.zip   ← ready for download / deployment
+```
+
