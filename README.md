@@ -107,4 +107,17 @@ predictions = pipeline.predict([
 ])
 print(predictions)  # e.g. ['business', 'politics']
 ```
+### Visualize results
+
+```python
+from bert_multiclass_pipeline_final import Visualiser
+
+viz = Visualiser(pipeline)
+viz.plot_all()              # 3-panel: loss, metrics, confusion matrix
+viz.plot_loss()
+viz.plot_metrics()
+viz.plot_confusion_matrix()
+```
+
+---
 
