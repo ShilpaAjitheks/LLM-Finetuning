@@ -7,7 +7,8 @@ Fine-tuning `bert-base-cased` for multi-class text classification with a clean, 
 ---
 ## Problem Statement
 
-Text classification at scale requires a reliable, reproducible pipeline that handles the full ML lifecycle: from raw CSV to a saved, deployable model. This project provides an end-to-end solution for fine-tuning BERT on any multi-class text dataset, demonstrated on the [BBC News dataset](https://www.kaggle.com/datasets/hgultekin/bbcnewsarchive) (5 categories: *business, entertainment, politics, sport, tech*).
+Text classification at scale requires a reliable, reproducible pipeline that handles the full ML lifecycle: from raw CSV to a saved, deployable model. This project provides an end-to-end solution for fine-tuning any HuggingFace encoder on any multi-class text dataset, demonstrated on the [BBC News dataset](https://www.kaggle.com/datasets/hgultekin/bbcnewsarchive) (5 categories: *business, entertainment, politics, sport, tech*).
+
 
 ## Architecture
 
