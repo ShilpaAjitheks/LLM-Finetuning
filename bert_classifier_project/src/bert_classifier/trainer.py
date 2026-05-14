@@ -1,6 +1,7 @@
 import os
 import pickle
 import shutil
+import numpy as np
 
 import torch
 from tqdm.auto import tqdm
@@ -94,25 +95,12 @@ class BERTTrainer:
     # ── Evaluation ──
 
     def evaluate(self, eval_dl, class_names):
-        """
-        Run inference on eval set and return classification report string.
-        """
-        self.model.eval()
-        all_preds, all_trues = [], []
-
-        for batch in eval_dl:
-            batch = {k: v.to(DEVICE) for k, v in batch.items()}
-            with torch.no_grad():
-                outputs = self.model(**batch)
-
-            all_preds.extend(torch.argmax(outputs.logits, dim=-1).cpu().numpy())
-            all_trues.extend(batch["labels"].cpu().numpy())
-
-        self.y_true = all_trues
-        self.y_pred = all_preds
+        """Run inference on eval set and return a classification report string."""
+        preds, trues, _ = self._run_inference(eval_dl)
+        self.y_true, self.y_pred = trues, preds
 
         return classification_report(
-            all_trues, all_preds,
+            trues, preds,
             target_names=class_names,
             zero_division=0,
         )
@@ -120,12 +108,7 @@ class BERTTrainer:
     # ── Inference ──
 
     def predict(self, texts, data_processor):
-        """
-        Predict class labels for a list of raw text strings.
-
-        Returns:
-            numpy array of predicted class name strings
-        """
+        """Predict class labels for a list of raw text strings."""
         encoded = {}
         for text in texts:
             tok = data_processor.tokenizer(text, truncation=True)
@@ -135,15 +118,8 @@ class BERTTrainer:
         ds = Dataset.from_dict(encoded)
         dl = DataLoader(ds, batch_size=self.cfg.batch_size, collate_fn=data_processor.collator)
 
-        self.model.eval()
-        all_preds = []
-        for batch in dl:
-            batch = {k: v.to(DEVICE) for k, v in batch.items()}
-            with torch.no_grad():
-                logits = self.model(**batch).logits
-            all_preds.extend(torch.argmax(logits, dim=-1).cpu().numpy())
-
-        return data_processor.class_names[all_preds]
+        preds, _, _ = self._run_inference(dl, collect_labels=False)
+        return data_processor.class_names[preds]
 
     # ── Save ──
 
@@ -193,20 +169,41 @@ class BERTTrainer:
         return schedulers[name]()
 
     @torch.no_grad()
-    def _compute_metrics(self, eval_dl):
-        self.model.eval()
-        total_loss = 0.0
-        all_preds, all_trues = [], []
+    def _run_inference(self, dl, collect_labels=True, collect_loss=False):
+        """
+        Shared inference loop used by _compute_metrics, evaluate, and predict.
 
-        for batch in eval_dl:
+        Args:
+            dl: DataLoader to run through the model.
+            collect_labels: If True, also return true labels (needs "labels" in batch).
+            collect_loss:   If True, also accumulate and return average loss.
+
+        Returns:
+            (preds, trues, avg_loss) — trues / avg_loss are empty/None if not collected.
+        """
+        self.model.eval()
+        all_preds, all_trues = [], []
+        total_loss = 0.0
+
+        for batch in dl:
             batch = {k: v.to(DEVICE) for k, v in batch.items()}
             outputs = self.model(**batch)
-            total_loss += outputs.loss.item() * batch["labels"].size(0)
-            all_preds.extend(torch.argmax(outputs.logits, dim=-1).cpu().numpy())
-            all_trues.extend(batch["labels"].cpu().numpy())
 
+            all_preds.extend(torch.argmax(outputs.logits, dim=-1).cpu().numpy())
+
+            if collect_loss:
+                total_loss += outputs.loss.item() * batch["labels"].size(0)
+            if collect_labels and "labels" in batch:
+                all_trues.extend(batch["labels"].cpu().numpy())
+
+        avg_loss = total_loss / len(dl.dataset) if collect_loss else None
+        return np.array(all_preds), np.array(all_trues), avg_loss
+
+    def _compute_metrics(self, eval_dl):
+        """Used during training — returns numeric metrics for logging."""
+        preds, trues, val_loss = self._run_inference(eval_dl, collect_loss=True)
         return {
-            "val_loss": total_loss / len(eval_dl.dataset),
-            "val_acc":  accuracy_score(all_trues, all_preds),
-            "val_f1":   f1_score(all_trues, all_preds, average="macro", zero_division=0),
+            "val_loss": val_loss,
+            "val_acc":  accuracy_score(trues, preds),
+            "val_f1":   f1_score(trues, preds, average="macro", zero_division=0),
         }
