@@ -1,6 +1,6 @@
-# bert-classifier
+# Bert-classifier
 
-Fine-tune BERT (or any HuggingFace encoder) for multi-class text classification — packaged from a notebook into a clean, installable Python project with a CLI and tests.
+Fine-tune BERT (or any HuggingFace encoder) for multi-class text classification — packaged into a clean, installable Python project with a CLI and tests.
 
 ## What it does
 
