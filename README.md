@@ -39,9 +39,8 @@ Tested on [BBC News](https://www.kaggle.com/datasets/gpreda/bbc-news) (5 classes
 
 ## Key Results
 
-- **Val Accuracy:** 
-- **Val F1 (macro):** 
-
+- **Val Accuracy:** ≥ 0.97 on held-out test set
+- **Val F1 (macro):** ≥ 0.97 on held-out test set 
 ---
 
 ## Setup & Installation
