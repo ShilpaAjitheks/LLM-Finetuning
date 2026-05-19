@@ -1,6 +1,6 @@
 # Multi-Class Text Classification using LLM ....
 <p align="center">
-  <img src="text_classification.png" alt="Text Classification Cover" width="100%"/>
+  <img src="text_classification_workflow.png" alt="Text Classification Cover" width="100%"/>
 </p>
 
 # BERT Multi-Class Text Classification Pipeline
